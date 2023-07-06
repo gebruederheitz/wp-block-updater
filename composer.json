@@ -1,0 +1,30 @@
+{
+    "name": "gebruederheitz/wp-block-updater",
+    "description": "Update dynamic blocks with innerBlocks",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "autoload": {
+        "psr-4": {
+            "Gebruederheitz\\Wordpress\\BlockUpdater\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "AndreasMaros",
+            "email": "andreas.maros@gebruederheitz.de"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.4",
+        "gebruederheitz/wp-theme-docs": "^2.0",
+        "gebruederheitz/wp-simple-rest": "^2.2"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.4",
+        "szepeviktor/phpstan-wordpress": "^1.0"
+    },
+    "scripts": {
+        "lint": "phpstan analyse -c .phpstan.neon"
+    }
+}
