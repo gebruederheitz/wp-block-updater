@@ -89,10 +89,7 @@ class BlockUpdater
                 ->allowOnlyEditors()
                 ->setMethods('GET')
                 ->setCallback([$this, 'getPublishedPostsAndPages']),
-            RestRoute::create(
-                'getAllowedBlockTypes',
-                '/block-updater/types',
-            )
+            RestRoute::create('getAllowedBlockTypes', '/block-updater/types')
                 ->allowOnlyEditors()
                 ->setMethods('GET')
                 ->setCallback([$this, 'getAllowedBlockTypes']),
@@ -126,7 +123,7 @@ class BlockUpdater
 
         $post = get_post($postId);
 
-        if (!$post || is_wp_error($post)) {
+        if (!$post) {
             return new WP_Error(404, 'No such post');
         }
 
@@ -135,7 +132,6 @@ class BlockUpdater
 
             foreach ($blocks as $i => $block) {
                 if ($block['blockName'] === $blockName) {
-
                     $blockRendered = '';
                     $blockContent = '';
 
@@ -153,9 +149,12 @@ class BlockUpdater
                 }
             }
 
-            $post->post_content = serialize_blocks($blocks);
+            $postContent = serialize_blocks($blocks);
 
-            wp_update_post($post);
+            wp_update_post([
+                'ID' => $postId,
+                'post_content' => $postContent,
+            ]);
 
             return true;
         }

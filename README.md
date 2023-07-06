@@ -1,6 +1,6 @@
 # Wordpress Block Updater
 
-_Blah_
+_Update dynamic blocks with innerBlocks_
 
 ---
 
