@@ -1,7 +1,8 @@
 <script lang="ts">
-    /* global ghwpNonce */
     import { onMount } from 'svelte';
     import Progress from './component/progress.svelte';
+
+    export let ghwpNonce: string;
 
     let postCount: number = 1;
     let postsProcessed: number | null = null;
