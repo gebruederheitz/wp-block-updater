@@ -15,12 +15,19 @@
     let skippedCount: number = 0;
 
     async function getAllowedBlockTypes(): Promise<void> {
-        const response = await fetch('/wp-json/ghwp/v1/block-updater/types');
+        const response = await fetch('/wp-json/ghwp/v1/block-updater/types', {
+            credentials: "same-origin"
+        });
         allowedTypes = await response.json();
     }
 
     async function processPost(postId): Promise<void> {
-        const r = await fetch(`/wp-json/ghwp/v1/block-updater/update-post?postId=${postId}&block=${selectedType}`);
+        const r = await fetch(
+            `/wp-json/ghwp/v1/block-updater/update-post?postId=${postId}&block=${selectedType}`,
+            {
+                credentials: "same-origin"
+            }
+        );
         postsProcessed = postsProcessed + 1;
 
         if (!r.ok) {
@@ -41,7 +48,9 @@
             return;
         }
 
-        const response = await fetch('/wp-json/ghwp/v1/block-updater/posts');
+        const response = await fetch('/wp-json/ghwp/v1/block-updater/posts', {
+            credentials: "same-origin"
+        });
         const posts = await response.json();
 
         postCount = posts.length;

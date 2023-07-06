@@ -1,2 +1,7 @@
+<style>
+    <?= file_get_contents(__DIR__ . '/../templates/assets/block-updater.css') ?>
+</style>
 <div id="app"></div>
-<script defer src="<?= __DIR__ . '/assets/block-updater.js' ?>"></script>
+<script>
+    <?= file_get_contents(__DIR__ . '/../templates/assets/block-updater.js') ?>
+</script>

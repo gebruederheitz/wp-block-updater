@@ -9,6 +9,7 @@ build:
 		&& npm run build
 	@mkdir -p templates/assets
 	@cp js/dist/block-updater.js templates/assets/
+	@cp js/dist/assets/index*.css templates/assets/block-updater.css
 
 # Run basic linting with prettier & phpstan
 lint:
