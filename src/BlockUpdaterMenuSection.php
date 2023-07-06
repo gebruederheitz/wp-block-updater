@@ -13,7 +13,7 @@ class BlockUpdaterMenuSection extends AbstractAdminPageSection implements
 {
     protected function getDefaultPartial(): string
     {
-        return __DIR__ . '/../../template-parts/meta/block-updater.php';
+        return __DIR__ . '/../templates/updater.php';
     }
 
     public function getTitle(): string
