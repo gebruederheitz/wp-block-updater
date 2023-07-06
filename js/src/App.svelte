@@ -1,4 +1,5 @@
 <script lang="ts">
+    /* global ghwpNonce */
     import { onMount } from 'svelte';
     import Progress from './component/progress.svelte';
 
@@ -14,9 +15,14 @@
     let updatedCount: number = 0;
     let skippedCount: number = 0;
 
+    let isRunning: boolean = false;
+
     async function getAllowedBlockTypes(): Promise<void> {
         const response = await fetch('/wp-json/ghwp/v1/block-updater/types', {
-            credentials: "same-origin"
+            credentials: "same-origin",
+            headers: {
+                'X-WP-Nonce': ghwpNonce,
+            },
         });
         allowedTypes = await response.json();
     }
@@ -25,7 +31,10 @@
         const r = await fetch(
             `/wp-json/ghwp/v1/block-updater/update-post?postId=${postId}&block=${selectedType}`,
             {
-                credentials: "same-origin"
+                credentials: "same-origin",
+                headers: {
+                    'X-WP-Nonce': ghwpNonce,
+                },
             }
         );
         postsProcessed = postsProcessed + 1;
@@ -48,8 +57,12 @@
             return;
         }
 
+        isRunning = true;
         const response = await fetch('/wp-json/ghwp/v1/block-updater/posts', {
-            credentials: "same-origin"
+            credentials: "same-origin",
+            headers: {
+                'X-WP-Nonce': ghwpNonce,
+            },
         });
         const posts = await response.json();
 
@@ -59,9 +72,7 @@
             await processPost(post);
         }
 
-        // for (let i = 0; i < posts.length; i++) {
-        //   await processPost(posts[i], blockType, i);
-        // }
+        isRunning = false;
     }
 
     onMount(async () => {
@@ -80,53 +91,60 @@
         label="{statusText}"
     />
 
-    <div id="control">
-        {#if allowedTypes}
-            <select name="allowed-types" bind:value={selectedType}>
-                {#each allowedTypes as type}
-                    <option value="{type}">{type}</option>
-                {/each}
-            </select>
+    {#if !isRunning}
+        <div class="ghbu-controls">
+            {#if allowedTypes?.length}
+                <select name="allowed-types" bind:value={selectedType}>
+                    {#each allowedTypes as type}
+                        <option value="{type}">{type}</option>
+                    {/each}
+                </select>
 
-            <button
-                type="button"
-                class="btn button button-primary"
-                disabled="{(!selectedType)}"
-                on:click={run}
-            >
-                Start
-            </button>
-        {/if}
-    </div>
+                <button
+                    type="button"
+                    class="btn button button-primary"
+                    disabled="{(!selectedType)}"
+                    on:click={run}
+                >
+                    Start
+                </button>
+            {/if}
+        </div>
+    {/if}
 
-    {#if postCount !== 1}
-        <div id="display">
-            <div id="status">{statusText}</div>
-            <div id="status-details">
-                Processed / Updated / Skipped / Errors:
-                <span id="processed">{postsProcessed}</span> /
-                <span id="updated">{updatedCount}</span> /
-                <span id="skipped">{skippedCount}</span> /
-                <span id="errors">{errorCount}</span> /
+    {#if isRunning}
+        <div class="ghbu-display">
+            <div class="ghbu-status">{statusText}</div>
+            <div class="ghbu-status-details">
+                <span class="ghbu-processed">Processed: {postsProcessed}</span> /
+                <span class="ghbu-updated">Updated: {updatedCount}</span> /
+                <span class="ghbu-skipped">Skipped: {skippedCount}</span> /
+                <span class="ghbu-errors">Errors: {errorCount}</span>
             </div>
         </div>
     {/if}
 </main>
 
 <style>
-    #updated {
+    .ghbu-display {
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 0;
+    }
+
+    .ghbu-updated {
         color: #0a3;
     }
 
-    #skipped {
+    .ghbu-skipped {
         color: #04d;
     }
 
-    #errors {
+    .ghbu-errors {
         color: #a00;
     }
 
-    #status {
+    .ghbu-status {
         font-weight: 600;
         font-size: 1.2em;
         line-height: 1.5;
