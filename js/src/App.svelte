@@ -6,7 +6,7 @@
 
     let postCount: number = 1;
     let postsProcessed: number | null = null;
-    let selectedType: string | null = null;
+    let selectedType: string | null = "";
     let allowedTypes;
 
     let percentage: number;
@@ -92,26 +92,29 @@
         label="{statusText}"
     />
 
-    {#if !isRunning}
-        <div class="ghbu-controls">
-            {#if allowedTypes?.length}
-                <select name="allowed-types" bind:value={selectedType}>
-                    {#each allowedTypes as type}
-                        <option value="{type}">{type}</option>
-                    {/each}
-                </select>
+    <div class="ghbu-controls">
+        {#if allowedTypes?.length}
+            <select
+                name="allowed-types"
+                bind:value={selectedType}
+                disabled="{!allowedTypes?.length || isRunning}"
+            >
+                <option value="" selected>Please select</option>
+                {#each allowedTypes as type}
+                    <option>{type}</option>
+                {/each}
+            </select>
+        {/if}
 
-                <button
-                    type="button"
-                    class="btn button button-primary"
-                    disabled="{(!selectedType)}"
-                    on:click={run}
-                >
-                    Start
-                </button>
-            {/if}
-        </div>
-    {/if}
+        <button
+            type="button"
+            class="button button-primary"
+            disabled="{(!selectedType || isRunning)}"
+            on:click={run}
+        >
+            Start
+        </button>
+    </div>
 
     {#if isRunning}
         <div class="ghbu-display">
