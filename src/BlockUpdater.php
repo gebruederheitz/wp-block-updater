@@ -127,6 +127,8 @@ class BlockUpdater
             return new WP_Error(404, 'No such post');
         }
 
+        $_REQUEST['bulk_edit'] = true;
+
         if (has_block($blockName, $post)) {
             $blocks = parse_blocks($post->post_content);
 
