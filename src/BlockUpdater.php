@@ -137,7 +137,10 @@ class BlockUpdater
                     : [$this, 'defaultCallback'];
 
             foreach ($blocks as $i => $block) {
-                if ($block['blockName'] === $blockName) {
+                if (
+                    isset($block['blockName']) &&
+                    $block['blockName'] === $blockName
+                ) {
                     $updatedBlock = call_user_func($callback, $block);
                     $blocks[$i] = $updatedBlock;
                 }
