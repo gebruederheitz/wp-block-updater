@@ -36,7 +36,7 @@ class BlockUpdater
 {
     use withREST;
 
-    /** @var array<string>|array<string, callable> */
+    /** @var array<string, callable|true> */
     private array $allowedBlocks;
 
     public static function factory($allowedBlocks): self
@@ -50,7 +50,7 @@ class BlockUpdater
     }
 
     /**
-     * @param array<string>|array<string, callable> $allowedBlocks
+     * @param array<string, callable|true> $allowedBlocks
      */
     public function __construct(array $allowedBlocks = [])
     {
@@ -98,7 +98,7 @@ class BlockUpdater
 
     public function getAllowedBlockTypes(): array
     {
-        return $this->allowedBlocks;
+        return array_keys($this->allowedBlocks);
     }
 
     public function getPublishedPostsAndPages(): array
@@ -117,10 +117,7 @@ class BlockUpdater
         $postId = $request->get_param('postId');
         $blockName = $request->get_param('block');
 
-        if (
-            !in_array($blockName, $this->allowedBlocks) &&
-            !array_key_exists($blockName, $this->allowedBlocks)
-        ) {
+        if (!array_key_exists($blockName, $this->allowedBlocks)) {
             return new WP_Error(403, 'Not an allowed block type');
         }
 
@@ -134,10 +131,10 @@ class BlockUpdater
 
         if (has_block($blockName, $post)) {
             $blocks = parse_blocks($post->post_content);
-            $callback = $this->allowedBlocks[$blockName] ?? [
-                $this,
-                'defaultCallback',
-            ];
+            $callback =
+                $this->allowedBlocks[$blockName] !== true
+                    ? $this->allowedBlocks[$blockName]
+                    : [$this, 'defaultCallback'];
 
             foreach ($blocks as $i => $block) {
                 if ($block['blockName'] === $blockName) {
