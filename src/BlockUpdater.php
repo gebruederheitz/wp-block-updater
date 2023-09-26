@@ -36,7 +36,7 @@ class BlockUpdater
 {
     use withREST;
 
-    /** @var array<string> */
+    /** @var array<string>|array<string, callable> */
     private array $allowedBlocks;
 
     public static function factory($allowedBlocks): self
@@ -50,7 +50,7 @@ class BlockUpdater
     }
 
     /**
-     * @param array<string> $allowedBlocks
+     * @param array<string>|array<string, callable> $allowedBlocks
      */
     public function __construct(array $allowedBlocks = [])
     {
@@ -117,7 +117,10 @@ class BlockUpdater
         $postId = $request->get_param('postId');
         $blockName = $request->get_param('block');
 
-        if (!in_array($blockName, $this->allowedBlocks)) {
+        if (
+            !in_array($blockName, $this->allowedBlocks) &&
+            !array_key_exists($blockName, $this->allowedBlocks)
+        ) {
             return new WP_Error(403, 'Not an allowed block type');
         }
 
@@ -131,22 +134,14 @@ class BlockUpdater
 
         if (has_block($blockName, $post)) {
             $blocks = parse_blocks($post->post_content);
+            $callback = $this->allowedBlocks[$blockName] ?? [
+                $this,
+                'defaultCallback',
+            ];
 
             foreach ($blocks as $i => $block) {
                 if ($block['blockName'] === $blockName) {
-                    $blockRendered = '';
-                    $blockContent = '';
-
-                    $updatedBlock = [...$block];
-                    $updatedBlock['attrs']['blockVersion'] = 2;
-
-                    foreach ($block['innerBlocks'] as $innerBlock) {
-                        $blockRendered .= render_block($innerBlock);
-                        $blockContent .= serialize_block($innerBlock);
-                    }
-
-                    $updatedBlock['innerContent'] = [$blockContent];
-                    $updatedBlock['innerHTML'] = $blockRendered;
+                    $updatedBlock = call_user_func($callback, $block);
                     $blocks[$i] = $updatedBlock;
                 }
             }
@@ -162,5 +157,24 @@ class BlockUpdater
         }
 
         return false;
+    }
+
+    protected function defaultCallback(array $block)
+    {
+        $blockRendered = '';
+        $blockContent = '';
+
+        $updatedBlock = [...$block];
+        $updatedBlock['attrs']['blockVersion'] = 2;
+
+        foreach ($block['innerBlocks'] as $innerBlock) {
+            $blockRendered .= render_block($innerBlock);
+            $blockContent .= serialize_block($innerBlock);
+        }
+
+        $updatedBlock['innerContent'] = [$blockContent];
+        $updatedBlock['innerHTML'] = $blockRendered;
+
+        return $updatedBlock;
     }
 }
