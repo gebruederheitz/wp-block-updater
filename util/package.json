@@ -1,6 +1,6 @@
 {
   "name": "@gebruederheitz/wp-block-updater-util",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Utilities for the gebruederheitz/wp-block-updater PHP composer package",
   "main": "",
   "engines": {
