@@ -137,11 +137,12 @@ class BlockUpdater
                     : [$this, 'defaultCallback'];
 
             foreach ($blocks as $i => $block) {
-                if (
-                    isset($block['blockName']) &&
-                    $block['blockName'] === $blockName
-                ) {
-                    $updatedBlock = call_user_func($callback, $block);
+                $updatedBlock = $this->findAndUpdateBlockRecursive(
+                    $block,
+                    $blockName,
+                    $callback,
+                );
+                if (is_array($updatedBlock)) {
                     $blocks[$i] = $updatedBlock;
                 }
             }
@@ -157,6 +158,33 @@ class BlockUpdater
         }
 
         return false;
+    }
+
+    protected function findAndUpdateBlockRecursive(
+        $block,
+        $blockName,
+        $callback
+    ): array {
+        if (isset($block['blockName']) && $block['blockName'] === $blockName) {
+            $updatedBlock = call_user_func($callback, $block);
+            return $updatedBlock;
+        }
+
+        if (!empty($block['innerBlocks'])) {
+            foreach ($block['innerBlocks'] as $i => $innerBlock) {
+                $updatedInnerBlock = $this->findAndUpdateBlockRecursive(
+                    $innerBlock,
+                    $blockName,
+                    $callback,
+                );
+
+                if (is_array($updatedInnerBlock)) {
+                    $block['innerBlocks'][$i] = $updatedInnerBlock;
+                }
+            }
+        }
+
+        return $block;
     }
 
     protected function defaultCallback(array $block)
